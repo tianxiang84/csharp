@@ -1,0 +1,20 @@
+version: '3.3'
+
+services:
+   vscode:
+     build:
+       context: ./
+       dockerfile: Dockerfile_vscode
+       args:
+         git_user: Tianxiang
+         git_email: TSu@slb.com
+     image: tianxiang84/vscode:latest
+     #container_name: atom
+     stdin_open: true
+     tty: true
+     volumes:
+       - ../../csharp:/home/code/csharp
+       - /tmp/.X11-unix:/tmp/.X11-unix
+     env_file:
+       vscode.env
+     working_dir: /home/code/csharp

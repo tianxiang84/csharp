@@ -1,0 +1,57 @@
+FROM        ubuntu:eoan
+
+ENV         DEBIAN_FRONTEND=noninteractive \
+            VSC_DL_URL=https://go.microsoft.com/fwlink/?LinkID=760868 \
+            HOME=/home/code
+
+RUN         apt-get update && \
+            apt-get install -y \
+                openssl \
+                nodejs \
+                npm \
+                git \
+                wget \
+                libgtk2.0 \
+                libgconf-2-4 \
+                libasound2 \
+                vim \
+                git && \
+            npm install -g typescript
+
+RUN         wget -O /tmp/vsc.deb $VSC_DL_URL && \
+            apt install -y /tmp/vsc.deb && \
+            rm -f /tmp/vsc.deb && \
+            useradd --user-group --create-home --home-dir $HOME code && \
+            mkdir -p $HOME/.vscode/extensions $HOME/.config/Code/User && \
+            touch $HOME/.config/Code/storage.json && \
+            chown -R code:code $HOME
+
+RUN wget -q https://packages.microsoft.com/config/ubuntu/19.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    apt-get update && \
+    apt-get install -y apt-transport-https && \
+    apt-get update && \
+    apt-get install -y dotnet-sdk-3.1 && \
+    apt-get update && \
+    apt-get install -y apt-transport-https && \
+    apt-get update && \
+    apt-get install -y aspnetcore-runtime-3.1 && \
+    apt-get update && \
+    apt-get install -y apt-transport-https && \
+    apt-get update && \
+    apt-get install -y dotnet-runtime-3.1
+
+USER        code
+WORKDIR     $HOME
+VOLUME 	    $HOME/.vscode
+VOLUME 	    $HOME/.config/Code
+
+ARG git_user='Tianxiang'
+ARG git_email='TSu@slb.com'
+RUN git config --global user.name ${git_user} && git config --global user.email ${git_email}
+
+#ENTRYPOINT  ["/usr/bin/code","--wait","--verbose"]
+#ENTRYPOINT ["sh", "-c", "/usr/bin/code --install-extension ms-vscode.csharp --user-data-dir; /usr/bin/code --wait --verbose"]
+#ENTRYPOINT ["sh", "-c", "/usr/bin/code --wait --verbose --user-data-dir"]
+#CMD ["--user-data-dir"]
+ENTRYPOINT ["/usr/bin/code", "--wait", "--verbose", "--user-data-dir"]
